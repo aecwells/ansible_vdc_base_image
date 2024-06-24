@@ -112,7 +112,7 @@ vcd_vms:
 
 ## Playbook
 
-`playbooks/update_vcd_base_image_with_cloud_init.yml`
+`update_vcd_base_image_with_cloud_init.yml`
 
 This playbook updates the VCD base image with cloud-init configurations. It handles powering on the VM, applying cloud-init configurations, and taking snapshots.
 
