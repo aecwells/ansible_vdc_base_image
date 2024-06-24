@@ -57,6 +57,7 @@ vcd_org: "your_vcd_org"
 vcd_vdc: "your_vcd_vdc"
 vcd_vapp: "your_vcd_vapp"
 snapshot_name: "base_image_snapshot"
+base_iso_catalog_name: "Base_ISO"  # Name of the ISO in the VCD catalog
 ```
 
 `inventory/group_vars/all/vcd_vms.yml`
@@ -121,6 +122,8 @@ This playbook updates the VCD base image with cloud-init configurations. It hand
 - name: Update VCD Base Image with Cloud-Init
   hosts: "{{ target_hosts }}"
   gather_facts: no
+  vars_files:
+    - ../inventory/group_vars/all/vcd_auth.yml
   tasks:
     - name: Power on the VM
       community.vmware.vcd_vapp_vm:
@@ -169,6 +172,33 @@ This playbook updates the VCD base image with cloud-init configurations. It hand
         timeout: 300
       delegate_to: localhost
 
+    - name: Find the ISO in the VCD catalog
+      community.vmware.vcd_catalog_find:
+        hostname: "{{ vcd_host }}"
+        username: "{{ vcd_username }}"
+        password: "{{ vcd_password }}"
+        org: "{{ vcd_org }}"
+        catalog_name: "{{ vcd_vdc }}"
+        item_name: "{{ base_iso_catalog_name }}"
+      register: iso_info
+
+    - name: Mount the ISO from the VCD catalog
+      community.vmware.vcd_vapp_vm_cdrom:
+        hostname: "{{ vcd_host }}"
+        username: "{{ vcd_username }}"
+        password: "{{ vcd_password }}"
+        org: "{{ vcd_org }}"
+        vdc: "{{ vcd_vdc }}"
+        vapp_name: "{{ vcd_vapp }}"
+        vm_name: "{{ item.key }}"
+        media_href: "{{ iso_info.catalog_item_href }}"
+        state: present
+        wait: yes
+      loop: "{{ hostvars[inventory_hostname].vms | dict2items }}"
+      loop_control:
+        loop_var: item
+        label: "{{ item.key }}"
+
     - name: Apply base cloud-init configuration
       community.vmware.vcd_vapp_vm:
         hostname: "{{ vcd_host }}"
@@ -199,6 +229,22 @@ This playbook updates the VCD base image with cloud-init configurations. It hand
           cloud_init: "{{ item.value.cloud_init_config_additional }}"
         wait: yes
       when: item.value.cloud_init_config_additional is defined
+      loop: "{{ hostvars[inventory_hostname].vms | dict2items }}"
+      loop_control:
+        loop_var: item
+        label: "{{ item.key }}"
+
+    - name: Unmount the ISO from the VM
+      community.vmware.vcd_vapp_vm_cdrom:
+        hostname: "{{ vcd_host }}"
+        username: "{{ vcd_username }}"
+        password: "{{ vcd_password }}"
+        org: "{{ vcd_org }}"
+        vdc: "{{ vcd_vdc }}"
+        vapp_name: "{{ vcd_vapp }}"
+        vm_name: "{{ item.key }}"
+        state: absent
+        wait: yes
       loop: "{{ hostvars[inventory_hostname].vms | dict2items }}"
       loop_control:
         loop_var: item
@@ -253,6 +299,9 @@ ansible-playbook -i inventory/hosts/host2.yml update_vcd_base_image_with_cloud_i
 
 ### Notes
 
+* **ISO Catalog Name**: Update base_iso_catalog_name in vcd_auth.yml with the exact name of the ISO as it appears in the VCD catalog.
+* **Catalog Item HREF**: The community.vmware.vcd_catalog_find module fetches the catalog_item_href which is used to mount the ISO to the VM.
+* Unmounting ISO: After applying cloud-init configurations, the playbook unmounts the ISO from the VM.
 * Ensure you have the necessary permissions and SSH keys configured to access the VMware Cloud Director and the VMs.
 * The playbook assumes that the base image VMs are defined under the vcd_vms variable in both group and host variable files.
 * Cloud-init configurations can be specified at both the group level (`inventory/group_vars/all/vcd_vms.yml`) and the host level (`inventory/host_vars/host1/vcd_vms.yml` and `inventory/host_vars/host2/vcd_vms.yml`).
