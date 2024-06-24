@@ -215,6 +215,8 @@ This playbook updates the VCD base image with cloud-init configurations. It hand
       loop_control:
         loop_var: item
         label: "{{ item.key }}"
+      vars:
+        snapshot_name: "snapshot_{{ item.key }}_{{ ansible_date_time.iso8601 }}"
 
     - name: Apply additional cloud-init configuration if defined
       community.vmware.vcd_vapp_vm:
@@ -233,6 +235,8 @@ This playbook updates the VCD base image with cloud-init configurations. It hand
       loop_control:
         loop_var: item
         label: "{{ item.key }}"
+      vars:
+        snapshot_name: "snapshot_{{ item.key }}_{{ ansible_date_time.iso8601 }}"
 
     - name: Unmount the ISO from the VM
       community.vmware.vcd_vapp_vm_cdrom:
@@ -266,7 +270,7 @@ This playbook updates the VCD base image with cloud-init configurations. It hand
         loop_var: item
         label: "{{ item.key }}"
 
-    - name: Take a snapshot of the VM
+    - name: Take a snapshot of the VM with hostname
       community.vmware.vcd_snapshot:
         hostname: "{{ vcd_host }}"
         username: "{{ vcd_username }}"
