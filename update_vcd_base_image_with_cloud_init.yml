@@ -2,6 +2,8 @@
 - name: Update VCD Base Image with Cloud-Init
   hosts: "{{ target_hosts }}"
   gather_facts: no
+  vars_files:
+    - ./inventory/group_vars/all/vcd_auth.yml
   tasks:
     - name: Power on the VM
       community.vmware.vcd_vapp_vm:
