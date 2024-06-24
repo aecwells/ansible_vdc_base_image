@@ -11,6 +11,7 @@ ansible_project/
 │   │   └── host2.yml
 │   └── group_vars/
 │       ├── all/
+│       │   └── vcd_auth.yml
 │       │   └── vcd_vms.yml
 │       └── host_vars/
 │           ├── host1/
