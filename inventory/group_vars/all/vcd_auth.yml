@@ -1,0 +1,8 @@
+# inventory/group_vars/all/vcd_auth.yml
+vcd_host: "vcd.example.com"
+vcd_username: "your_vcd_username"
+vcd_password: "your_vcd_password"
+vcd_org: "your_vcd_org"
+vcd_vdc: "your_vcd_vdc"
+vcd_vapp: "your_vcd_vapp"
+snapshot_name: "base_image_snapshot"
