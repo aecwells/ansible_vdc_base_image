@@ -123,7 +123,7 @@ This playbook updates the VCD base image with cloud-init configurations. It hand
   hosts: "{{ target_hosts }}"
   gather_facts: no
   vars_files:
-    - ../inventory/group_vars/all/vcd_auth.yml
+    - ./inventory/group_vars/all/vcd_auth.yml
   tasks:
     - name: Power on the VM
       community.vmware.vcd_vapp_vm:
