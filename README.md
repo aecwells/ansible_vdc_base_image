@@ -56,7 +56,7 @@ vcd_password: "your_vcd_password"
 vcd_org: "your_vcd_org"
 vcd_vdc: "your_vcd_vdc"
 vcd_vapp: "your_vcd_vapp"
-snapshot_name: "base_image_snapshot"
+snapshot_name: "base_image_snapshot" # Dynamiclly created
 base_iso_catalog_name: "Base_ISO"  # Name of the ISO in the VCD catalog
 ```
 
