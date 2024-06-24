@@ -17,8 +17,7 @@ ansible_project/
 │           │   └── vcd_vms.yml
 │           └── host2/
 │               └── vcd_vms.yml
-├── playbooks/
-│   └── update_vcd_base_image_with_cloud_init.yml
+├── update_vcd_base_image_with_cloud_init.yml
 └── README.md
 ```
 
