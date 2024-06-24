@@ -241,13 +241,13 @@ This playbook updates the VCD base image with cloud-init configurations. It hand
 
 To run the playbook for a specific host, use the following command:
 ```bash
-ansible-playbook -i inventory/hosts/host1.yml playbooks/update_vcd_base_image_with_cloud_init.yml -e "target_hosts=host1"
+ansible-playbook -i inventory/hosts/host1.yml update_vcd_base_image_with_cloud_init.yml -e "target_hosts=host1"
 ```
 
 or
 
 ```bash
-ansible-playbook -i inventory/hosts/host2.yml playbooks/update_vcd_base_image_with_cloud_init.yml -e "target_hosts=host2"
+ansible-playbook -i inventory/hosts/host2.yml update_vcd_base_image_with_cloud_init.yml -e "target_hosts=host2"
 ```
 
 ### Notes
