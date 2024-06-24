@@ -1,6 +1,6 @@
 # Ansible Project for Managing VMware Cloud Director Base Images with Cloud-Init
 
-This project contains Ansible playbooks and inventory files to manage and update base images on VMware Cloud Director (VCD) using cloud-init configurations. The setup allows for different cloud-init configurations per host and provides a way to organize and manage these configurations efficiently.
+This project contains an Ansible playbook and inventory files to manage and update base images on VMware Cloud Director (VCD) using cloud-init configurations. The setup allows for different cloud-init configurations per host and provides a way to organize and manage these configurations efficiently.
 
 ## Directory Strucure
 ```
