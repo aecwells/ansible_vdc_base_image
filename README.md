@@ -44,6 +44,21 @@ all:
     host2:
 ```
 
+`inventory/group_vars/all/vcd_auth.yml`
+
+This file contains the global variables for authentication with VMware Cloud Director.
+
+```yaml
+# inventory/group_vars/all/vcd_auth.yml
+vcd_host: "vcd.example.com"
+vcd_username: "your_vcd_username"
+vcd_password: "your_vcd_password"
+vcd_org: "your_vcd_org"
+vcd_vdc: "your_vcd_vdc"
+vcd_vapp: "your_vcd_vapp"
+snapshot_name: "base_image_snapshot"
+```
+
 `inventory/group_vars/all/vcd_vms.yml`
 
 Contains global group variables for vcd_vms. These variables apply to all hosts unless overridden at the host level.
