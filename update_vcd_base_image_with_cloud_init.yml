@@ -1,0 +1,118 @@
+---
+- name: Update VCD Base Image with Cloud-Init
+  hosts: "{{ target_hosts }}"
+  gather_facts: no
+  tasks:
+    - name: Power on the VM
+      community.vmware.vcd_vapp_vm:
+        hostname: "{{ vcd_host }}"
+        username: "{{ vcd_username }}"
+        password: "{{ vcd_password }}"
+        org: "{{ vcd_org }}"
+        vdc: "{{ vcd_vdc }}"
+        vapp_name: "{{ vcd_vapp }}"
+        vm_name: "{{ item.key }}"
+        state: running
+        wait: yes
+      loop: "{{ hostvars[inventory_hostname].vms | dict2items }}"
+      loop_control:
+        loop_var: item
+        label: "{{ item.key }}"
+
+    - name: Get the VM IP address
+      community.vmware.vcd_vapp_vm_info:
+        hostname: "{{ vcd_host }}"
+        username: "{{ vcd_username }}"
+        password: "{{ vcd_password }}"
+        org: "{{ vcd_org }}"
+        vdc: "{{ vcd_vdc }}"
+        vapp_name: "{{ vcd_vapp }}"
+        vm_name: "{{ item.key }}"
+      register: vm_info
+      loop: "{{ hostvars[inventory_hostname].vms | dict2items }}"
+      loop_control:
+        loop_var: item
+        label: "{{ item.key }}"
+
+    - name: Set VM IP address fact
+      set_fact:
+        vcd_vm_ip: "{{ vm_info.results[ansible_loop.index0].vm_list[0].guest_ip_address }}"
+      loop: "{{ hostvars[inventory_hostname].vms | dict2items }}"
+      loop_control:
+        loop_var: item
+        label: "{{ item.key }}"
+
+    - name: Wait for the VM to be powered on and accessible via SSH
+      wait_for:
+        host: "{{ vcd_vm_ip }}"
+        port: 22
+        delay: 10
+        timeout: 300
+      delegate_to: localhost
+
+    - name: Apply base cloud-init configuration
+      community.vmware.vcd_vapp_vm:
+        hostname: "{{ vcd_host }}"
+        username: "{{ vcd_username }}"
+        password: "{{ vcd_password }}"
+        org: "{{ vcd_org }}"
+        vdc: "{{ vcd_vdc }}"
+        vapp_name: "{{ vcd_vapp }}"
+        vm_name: "{{ item.key }}"
+        customization:
+          cloud_init: "{{ item.value.cloud_init_config }}"
+        wait: yes
+      loop: "{{ hostvars[inventory_hostname].vms | dict2items }}"
+      loop_control:
+        loop_var: item
+        label: "{{ item.key }}"
+
+    - name: Apply additional cloud-init configuration if defined
+      community.vmware.vcd_vapp_vm:
+        hostname: "{{ vcd_host }}"
+        username: "{{ vcd_username }}"
+        password: "{{ vcd_password }}"
+        org: "{{ vcd_org }}"
+        vdc: "{{ vcd_vdc }}"
+        vapp_name: "{{ vcd_vapp }}"
+        vm_name: "{{ item.key }}"
+        customization:
+          cloud_init: "{{ item.value.cloud_init_config_additional }}"
+        wait: yes
+      loop: "{{ hostvars[inventory_hostname].vms | dict2items }}"
+      loop_control:
+        loop_var: item
+        label: "{{ item.key }}"
+
+    - name: Power off the VM
+      community.vmware.vcd_vapp_vm:
+        hostname: "{{ vcd_host }}"
+        username: "{{ vcd_username }}"
+        password: "{{ vcd_password }}"
+        org: "{{ vcd_org }}"
+        vdc: "{{ vcd_vdc }}"
+        vapp_name: "{{ vcd_vapp }}"
+        vm_name: "{{ item.key }}"
+        state: poweredoff
+        wait: yes
+      loop: "{{ hostvars[inventory_hostname].vms | dict2items }}"
+      loop_control:
+        loop_var: item
+        label: "{{ item.key }}"
+
+    - name: Take a snapshot of the VM
+      community.vmware.vcd_snapshot:
+        hostname: "{{ vcd_host }}"
+        username: "{{ vcd_username }}"
+        password: "{{ vcd_password }}"
+        org: "{{ vcd_org }}"
+        vdc: "{{ vcd_vdc }}"
+        vapp_name: "{{ vcd_vapp }}"
+        vm_name: "{{ item.key }}"
+        state: present
+        name: "{{ snapshot_name }}"
+        description: "Snapshot after updates"
+      loop: "{{ hostvars[inventory_hostname].vms | dict2items }}"
+      loop_control:
+        loop_var: item
+        label: "{{ item.key }}"
