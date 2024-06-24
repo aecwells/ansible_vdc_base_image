@@ -1,0 +1,4 @@
+# inventory/hosts/host1.yml
+all:
+  children:
+    host1:
