@@ -4,7 +4,7 @@ This project contains Ansible playbooks and inventory files to manage and update
 
 ## Directory Strucure
 ```
-ansible_project/
+ansible_vdc_base_image/
 ├── inventory/
 │   ├── hosts/
 │   │   ├── host1.yml
