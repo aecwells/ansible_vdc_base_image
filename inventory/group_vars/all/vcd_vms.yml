@@ -1,0 +1,18 @@
+# inventory/group_vars/all/vcd_vms.yml
+vcd_vms:
+  base-image-vm:
+    cloud_init_config: |
+      # Cloud-init configuration for base-image-vm (global)
+      users:
+        - name: global_user
+          ssh-authorized-keys:
+            - ssh-rsa AAAAB3NzaC1yc2EAAAABIwAAAQEAr... global_key_comment
+          sudo: ['ALL=(ALL) NOPASSWD:ALL']
+          groups: sudo
+          shell: /bin/bash
+      packages:
+        - global_package
+      runcmd:
+        - apt-get update -y
+        - apt-get upgrade -y
+        - apt-get install -y global_package
