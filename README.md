@@ -1,0 +1,1 @@
+# ansible_vdc_base_image
