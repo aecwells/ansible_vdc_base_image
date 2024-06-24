@@ -1,0 +1,6 @@
+# inventory/host_vars/host1/vcd_vms.yml
+vcd_vms:
+  base-image-vm:
+    cloud_init_config_additional:
+      runcmd:
+        - echo "Additional command for host1"
