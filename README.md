@@ -305,10 +305,12 @@ ansible-playbook -i inventory/hosts/host2.yml update_vcd_base_image_with_cloud_i
 
 * **ISO Catalog Name**: Update base_iso_catalog_name in vcd_auth.yml with the exact name of the ISO as it appears in the VCD catalog.
 * **Catalog Item HREF**: The community.vmware.vcd_catalog_find module fetches the catalog_item_href which is used to mount the ISO to the VM.
-* Unmounting ISO: After applying cloud-init configurations, the playbook unmounts the ISO from the VM.
+* **Unmount ISO**: The playbook includes a task (`community.vmware.vcd_vapp_vm_cdrom`) to unmount the ISO from the VM after applying the cloud-init configurations.
+* **Loop Control**: Each task inside the loop (`community.vmware.vcd_vapp_vm`, `community.vmware.vcd_snapshot`, etc.) uses `loop_control` to specify `loop_var: item` and `label`: `"{{ item.key }}"` to ensure proper iteration over the VMs defined in your inventory.
+* **Dynamic Snapshot Name**: The `snapshot_name` variable is dynamically set within the loop using `item.key` (which is the hostname of the VM) and `ansible_date_time.iso8601` (to include a timestamp for uniqueness).
 * Ensure you have the necessary permissions and SSH keys configured to access the VMware Cloud Director and the VMs.
 * The playbook assumes that the base image VMs are defined under the vcd_vms variable in both group and host variable files.
 * Cloud-init configurations can be specified at both the group level (`inventory/group_vars/all/vcd_vms.yml`) and the host level (`inventory/host_vars/host1/vcd_vms.yml` and `inventory/host_vars/host2/vcd_vms.yml`).
 * The playbook includes a task to apply additional cloud-init configurations if they are defined at the host level.
 
-This setup provides a flexible way to manage different cloud-init configurations for multiple VMs in VMware Cloud Director, ensuring that each host can have its specific configuration while still leveraging global configurations.
+This setup offers a flexible approach to managing distinct cloud-init configurations for multiple VMs in VMware Cloud Director. Each host can maintain its specific configuration while still utilizing global settings. Additionally, each VM's snapshot is uniquely named with its hostname and a timestamp, enhancing clarity and traceability in your VMware Cloud Director environment. Be sure to adjust paths, variables, and configurations according to your specific requirements.
