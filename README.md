@@ -9,15 +9,15 @@ ansible_vdc_base_image/
 │   ├── hosts/
 │   │   ├── host1.yml
 │   │   └── host2.yml
-│   └── group_vars/
-│       ├── all/
-│       │   └── vcd_auth.yml
+│   ├── group_vars/
+│   │   ├── all/
+│   │   │   └── vcd_auth.yml
+│   │   │   └── vcd_vms.yml
+│   └── host_vars/
+│       ├── host1/
 │       │   └── vcd_vms.yml
-│       └── host_vars/
-│           ├── host1/
-│           │   └── vcd_vms.yml
-│           └── host2/
-│               └── vcd_vms.yml
+│       └── host2/
+│           └── vcd_vms.yml
 ├── update_vcd_base_image_with_cloud_init.yml
 └── README.md
 ```
