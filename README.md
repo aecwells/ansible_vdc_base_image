@@ -94,8 +94,75 @@ Contains host-specific variables for vcd_vms on host1, overriding or adding to t
 vcd_vms:
   base-image-vm:
     cloud_init_config_additional:
+      users:
+        - name: devuser1
+          groups: www-data
+          sudo: ['ALL=(ALL) NOPASSWD:ALL']
+          shell: /bin/bash
+          ssh-authorized-keys:
+            - ssh-rsa AAAAB3NzaC1yc2EAAAABIwAAAQE...user1_key...
+
+        - name: devuser2
+          groups: www-data
+          sudo: ['ALL=(ALL) NOPASSWD:ALL']
+          shell: /bin/bash
+          ssh-authorized-keys:
+            - ssh-rsa AAAAB3NzaC1yc2EAAAABIwAAAQE...user2_key...
+
+      packages:
+        - nginx
+        - php-fpm
+        - php-mysql
+        - mysql-client
+
       runcmd:
         - echo "Additional command for host1"
+        # Create necessary directories
+        - mkdir -p /var/www/site1
+        - mkdir -p /var/www/site2
+        - mkdir -p /home/devuser1/sites
+        - mkdir -p /home/devuser2/sites
+
+        # Download and extract the backups from the backup server
+        - wget http://backupserver/backup/site1.tar.gz -O /tmp/site1.tar.gz
+        - wget http://backupserver/backup/site2.tar.gz -O /tmp/site2.tar.gz
+
+        - tar -xzf /tmp/site1.tar.gz -C /var/www/site1
+        - tar -xzf /tmp/site2.tar.gz -C /var/www/site2
+
+        # Set permissions
+        - chown -R www-data:www-data /var/www/site1
+        - chown -R www-data:www-data /var/www/site2
+        - find /var/www/site1/public_html/ -type d -exec chmod 750 {} \;
+        - find /var/www/site1/public_html/ -type f -exec chmod 640 {} \;
+        - chmod 640 /var/www/site1/public_html/wp-config.php
+        - find /var/www/site2/public_html/ -type d -exec chmod 750 {} \;
+        - find /var/www/site2/public_html/ -type f -exec chmod 640 {} \;
+        - chmod 640 /var/www/site2/public_html/wp-config.php
+
+        # Create symbolic links
+        - ln -s /var/www/site1 /home/devuser1/sites/site1
+        - ln -s /var/www/site2 /home/devuser1/sites/site2
+        - ln -s /var/www/site1 /home/devuser2/sites/site1
+        - ln -s /var/www/site2 /home/devuser2/sites/site2
+        - chown -R devuser1:www-data /home/devuser1/sites
+        - chown -R devuser2:www-data /home/devuser2/sites
+
+        # Restore MySQL database
+        # could use wp-cli instead
+        - wget http://backupserver/backup/site1_db.sql.gz -O /tmp/site1_db.sql.gz
+        - wget http://backupserver/backup/site2_db.sql.gz -O /tmp/site2_db.sql.gz
+        - gunzip /tmp/site1_db.sql.gz
+        - gunzip /tmp/site2_db.sql.gz
+        # could use wp-cli instead
+        - mysql -u root -pYOURPASSWORD site1_db < /tmp/site1_db.sql
+        - mysql -u root -pYOURPASSWORD site2_db < /tmp/site2_db.sql
+
+        # Enable Nginx sites and restart services
+        - ln -s /etc/nginx/sites-available/site1 /etc/nginx/sites-enabled/site1
+        - ln -s /etc/nginx/sites-available/site2 /etc/nginx/sites-enabled/site2
+        - systemctl restart nginx
+        - systemctl restart php8.2-fpm
 ```
 
 `inventory/host_vars/host2/vcd_vms.yml`
