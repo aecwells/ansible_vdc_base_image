@@ -2,5 +2,43 @@
 vcd_vms:
   base-image-vm:
     cloud_init_config_additional:
+      users:
+        - name: devuser1
+          groups: www-data
+          sudo: ['ALL=(ALL) NOPASSWD:ALL']
+          shell: /bin/bash
+          ssh-authorized-keys:
+            - ssh-rsa AAAAB3NzaC1yc2EAAAABIwAAAQE...user1_key...
+
+        - name: devuser2
+          groups: www-data
+          sudo: ['ALL=(ALL) NOPASSWD:ALL']
+          shell: /bin/bash
+          ssh-authorized-keys:
+            - ssh-rsa AAAAB3NzaC1yc2EAAAABIwAAAQE...user2_key...
+
+      packages:
+        - nginx
+        - php-fpm
+        - php-mysql
+
       runcmd:
         - echo "Additional command for host1"
+        - mkdir -p /var/www/site1
+        - mkdir -p /var/www/site2
+        - chown -R www-data:www-data /var/www/site1
+        - chown -R www-data:www-data /var/www/site2
+        - find /var/www/site1/public_html -type d -exec chmod 750 {} \;
+        - find /var/www/site1/public_html -type f -exec chmod 640 {} \;
+        - chmod 640 /var/www/site1/public_html/wp-config.php
+        - find /var/www/site2/public_htmml -type d -exec chmod 750 {} \;
+        - find /var/www/site2/public_html -type f -exec chmod 640 {} \;
+        - chmod 640 /var/www/site2/public_html/wp-config.php
+        - ln -s /var/www/site1 /home/devuser1/sites/site1
+        - ln -s /var/www/site2 /home/devuser1/sites/site2
+        - ln -s /var/www/site1 /home/devuser2/sites/site1
+        - ln -s /var/www/site2 /home/devuser2/sites/site2
+        - chown -R devuser1:www-data /home/devuser1/sites
+        - chown -R devuser2:www-data /home/devuser2/sites
+        - systemctl restart nginx
+        - systemctl restart php8.2-fpm
